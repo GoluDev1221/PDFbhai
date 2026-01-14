@@ -1,10 +1,9 @@
+
 import * as pdfjsLib from 'pdfjs-dist';
 import { PDFDocument, rgb } from 'pdf-lib';
 import { PageItem, UploadedFile, LayoutSettings } from '../types';
 
 // Configure PDF.js worker
-// We explicitly set the worker source to match the version defined in importmap
-// This ensures compatibility between the main thread and worker thread
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.8.69/pdf.worker.min.mjs`;
 
 export const loadPdfFile = async (file: File): Promise<UploadedFile> => {
@@ -12,10 +11,8 @@ export const loadPdfFile = async (file: File): Promise<UploadedFile> => {
     const arrayBuffer = await file.arrayBuffer();
     
     // Load document to get page count
-    // Important: We must slice the ArrayBuffer because pdfjs might detach it
     const loadingTask = pdfjsLib.getDocument({ 
         data: arrayBuffer.slice(0),
-        // cMapUrl and cMapPacked are needed for some PDFs with complex fonts
         cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.8.69/cmaps/',
         cMapPacked: true,
     });
@@ -40,7 +37,6 @@ export const renderPageToThumbnail = async (
   pageIndex: number,
   scale: number = 0.5
 ): Promise<{ dataUrl: string; width: number; height: number }> => {
-  // Use slice(0) to ensure we have a fresh copy of the buffer
   const loadingTask = pdfjsLib.getDocument({ 
     data: fileData.slice(0),
     cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.8.69/cmaps/',
@@ -82,20 +78,15 @@ const applyFiltersToContext = (
 
   const { invert, grayscale, whiteness, blackness } = filters;
 
-  // Convert slider 0-100 to usable multipliers
-  const brightnessMult = 1 + (whiteness / 100); // 1.0 to 2.0
-  const contrastMult = 1 + (blackness / 100); // 1.0 to 2.0
-  
-  // Intercept calculation to minimize loop overhead
+  const brightnessMult = 1 + (whiteness / 100);
+  const contrastMult = 1 + (blackness / 100);
   const intercept = 128 * (1 - contrastMult);
 
   for (let i = 0; i < data.length; i += 4) {
     let r = data[i];
     let g = data[i + 1];
     let b = data[i + 2];
-    // Alpha data[i+3] ignored for now
 
-    // 1. Grayscale
     if (grayscale) {
       const avg = 0.299 * r + 0.587 * g + 0.114 * b;
       r = avg;
@@ -103,25 +94,20 @@ const applyFiltersToContext = (
       b = avg;
     }
 
-    // 2. Invert
     if (invert) {
       r = 255 - r;
       g = 255 - g;
       b = 255 - b;
     }
 
-    // 3. Scan Cleanup (Brightness/Contrast manual implementation)
-    // Apply Brightness
     r *= brightnessMult;
     g *= brightnessMult;
     b *= brightnessMult;
 
-    // Apply Contrast
     r = r * contrastMult + intercept;
     g = g * contrastMult + intercept;
     b = b * contrastMult + intercept;
 
-    // Clamp values
     data[i] = Math.min(255, Math.max(0, r));
     data[i + 1] = Math.min(255, Math.max(0, g));
     data[i + 2] = Math.min(255, Math.max(0, b));
@@ -145,28 +131,59 @@ export const generateFinalPdf = async (
   }
 
   // Helper to process a single visual page item into an embeddable image
-  // We effectively "Screenshot" the page with filters applied
+  // This bakes filters, rotation, and doodles into a single JPG
   const processPageImage = async (pageItem: PageItem): Promise<Uint8Array> => {
-    // We need to re-render at higher quality for print
+    // 1. High quality render from PDF
     const file = files[pageItem.fileId];
-    // High quality render
-    const { dataUrl, width, height } = await renderPageToThumbnail(file.data, pageItem.originalPageIndex, 1.5); // 1.5 scale for better quality
+    const { dataUrl, width, height } = await renderPageToThumbnail(file.data, pageItem.originalPageIndex, 1.5);
     
-    // Load into an image element so we can draw it to a canvas
+    // 2. Load base PDF image
     const img = new Image();
     img.src = dataUrl;
     await new Promise(r => img.onload = r);
 
+    // 3. Setup Canvas (Handling Rotation)
     const canvas = document.createElement('canvas');
-    canvas.width = width;
-    canvas.height = height;
     const ctx = canvas.getContext('2d');
     if (!ctx) throw new Error("Canvas context failed");
 
-    ctx.drawImage(img, 0, 0);
+    const isRotated90or270 = pageItem.rotation === 90 || pageItem.rotation === 270;
     
-    // Apply filters at pixel level
-    applyFiltersToContext(ctx, width, height, pageItem.filters);
+    // Swap width/height if rotated 90 or 270
+    canvas.width = isRotated90or270 ? height : width;
+    canvas.height = isRotated90or270 ? width : height;
+
+    // Apply Rotation to Context
+    ctx.translate(canvas.width / 2, canvas.height / 2);
+    ctx.rotate((pageItem.rotation * Math.PI) / 180);
+    ctx.drawImage(img, -width / 2, -height / 2);
+    
+    // Reset Transform for Filters (Filters apply to pixels, so we apply to the whole rotated canvas)
+    // Actually filters should apply to the content.
+    // However, applyFiltersToContext works on ImageData. 
+    // We need to apply filters BEFORE rotation to handle them correctly per pixel relative to content?
+    // No, applyFiltersToContext is a simple pixel manipulator. Applying it after rotation is fine.
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+    // 4. Apply Filters
+    applyFiltersToContext(ctx, canvas.width, canvas.height, pageItem.filters);
+
+    // 5. Apply Drawing / Doodle Layer
+    // We need to rotate the context again to match the image orientation if we want the drawing to stick to the image
+    // OR, we assume the drawing was made ON TOP of the visual orientation.
+    // In Step2_Workshop, the user draws on the displayed image. If the image wasn't rotated then, the doodle is upright.
+    // Since rotation happens in Step 3, the doodle should rotate WITH the image.
+    if (pageItem.drawingDataUrl) {
+        const doodleImg = new Image();
+        doodleImg.src = pageItem.drawingDataUrl;
+        await new Promise(r => doodleImg.onload = r);
+        
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        ctx.rotate((pageItem.rotation * Math.PI) / 180);
+        // Doodle is drawn on original dimensions
+        ctx.drawImage(doodleImg, -width / 2, -height / 2, width, height);
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+    }
 
     // Return compressed JPEG bytes
     const processedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
@@ -188,8 +205,7 @@ export const generateFinalPdf = async (
     chunkedPages.push(activePages.slice(i, i + itemsPerPage));
   }
 
-  // A4 Standard Dimensions (at 72 DPI, typically PDF-lib uses points)
-  // A4 is 595.28 x 841.89
+  // A4 Standard Dimensions
   const PAGE_WIDTH = 595.28;
   const PAGE_HEIGHT = 841.89;
   const MARGIN = 20;
@@ -197,15 +213,22 @@ export const generateFinalPdf = async (
   for (const chunk of chunkedPages) {
     const page = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
     
-    // Calculate grid
-    // 1-up: 1x1
-    // 2-up: 1x2 (One on top of another)
-    // 4-up: 2x2
-    
+    // Dynamic Grid Calculation
+    // We try to fill the page logically based on N
     let cols = 1;
     let rows = 1;
-    if (itemsPerPage === 2) { rows = 2; }
-    if (itemsPerPage === 4) { cols = 2; rows = 2; }
+
+    switch(itemsPerPage) {
+        case 1: cols = 1; rows = 1; break;
+        case 2: cols = 1; rows = 2; break; // 1x2 split
+        case 3: cols = 1; rows = 3; break; // 1x3 stacked
+        case 4: cols = 2; rows = 2; break; // 2x2
+        case 5: cols = 2; rows = 3; break; // 2x3 (one empty)
+        case 6: cols = 2; rows = 3; break; // 2x3
+        case 7: cols = 2; rows = 4; break; // 2x4
+        case 8: cols = 2; rows = 4; break; // 2x4
+        default: cols = 1; rows = 1;
+    }
 
     const cellWidth = (PAGE_WIDTH - (MARGIN * 2)) / cols;
     const cellHeight = (PAGE_HEIGHT - (MARGIN * 2)) / rows;
@@ -221,6 +244,7 @@ export const generateFinalPdf = async (
 
       // Scale image to fit cell, maintaining aspect ratio
       const imgDims = embeddedImage.scale(1);
+      
       const scaleX = (cellWidth - 10) / imgDims.width;
       const scaleY = (cellHeight - 10) / imgDims.height;
       const scale = Math.min(scaleX, scaleY);
@@ -229,8 +253,7 @@ export const generateFinalPdf = async (
       const drawHeight = imgDims.height * scale;
 
       const x = MARGIN + (colIndex * cellWidth) + (cellWidth - drawWidth) / 2;
-      // PDF coordinates start at bottom left. We need to invert Y logic.
-      // Top row is highest Y.
+      // PDF coordinates: Top row is highest Y
       const y = PAGE_HEIGHT - MARGIN - ((rowIndex + 1) * cellHeight) + (cellHeight - drawHeight) / 2;
 
       page.drawImage(embeddedImage, {
@@ -238,6 +261,7 @@ export const generateFinalPdf = async (
         y,
         width: drawWidth,
         height: drawHeight,
+        // We do NOT use rotate here because we baked it into the imageBuffer in processPageImage
       });
 
       if (layout.showBorders) {
