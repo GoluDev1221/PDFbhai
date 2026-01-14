@@ -3,23 +3,36 @@ import { PDFDocument, rgb } from 'pdf-lib';
 import { PageItem, UploadedFile, LayoutSettings } from '../types';
 
 // Configure PDF.js worker
-// We use a CDN for the worker to avoid bundler configuration complexity in this environment
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+// We explicitly set the worker source to match the version defined in importmap
+// This ensures compatibility between the main thread and worker thread
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.8.69/pdf.worker.min.mjs`;
 
 export const loadPdfFile = async (file: File): Promise<UploadedFile> => {
-  const arrayBuffer = await file.arrayBuffer();
-  
-  // Load document to get page count
-  const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer.slice(0) });
-  const pdf = await loadingTask.promise;
+  try {
+    const arrayBuffer = await file.arrayBuffer();
+    
+    // Load document to get page count
+    // Important: We must slice the ArrayBuffer because pdfjs might detach it
+    const loadingTask = pdfjsLib.getDocument({ 
+        data: arrayBuffer.slice(0),
+        // cMapUrl and cMapPacked are needed for some PDFs with complex fonts
+        cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.8.69/cmaps/',
+        cMapPacked: true,
+    });
+    
+    const pdf = await loadingTask.promise;
 
-  return {
-    id: crypto.randomUUID(),
-    name: file.name,
-    size: file.size,
-    pageCount: pdf.numPages,
-    data: arrayBuffer,
-  };
+    return {
+      id: crypto.randomUUID(),
+      name: file.name,
+      size: file.size,
+      pageCount: pdf.numPages,
+      data: arrayBuffer,
+    };
+  } catch (error) {
+    console.error("Detailed PDF Load Error:", error);
+    throw new Error(`Failed to parse PDF: ${error instanceof Error ? error.message : "Unknown error"}`);
+  }
 };
 
 export const renderPageToThumbnail = async (
@@ -27,7 +40,12 @@ export const renderPageToThumbnail = async (
   pageIndex: number,
   scale: number = 0.5
 ): Promise<{ dataUrl: string; width: number; height: number }> => {
-  const loadingTask = pdfjsLib.getDocument({ data: fileData.slice(0) });
+  // Use slice(0) to ensure we have a fresh copy of the buffer
+  const loadingTask = pdfjsLib.getDocument({ 
+    data: fileData.slice(0),
+    cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.8.69/cmaps/',
+    cMapPacked: true,
+  });
   const pdf = await loadingTask.promise;
   const page = await pdf.getPage(pageIndex + 1); // pdfjs is 1-based
 
