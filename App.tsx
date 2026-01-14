@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Stepper } from './components/Stepper';
 import { Step1_Upload } from './components/Step1_Upload';
@@ -52,8 +53,6 @@ const App: React.FC = () => {
       const newPages: PageItem[] = [];
       
       // Iterate all files and render every page
-      // In a real production app, we might do this lazily or in chunks, 
-      // but for "Workshop" feel we do it upfront.
       for (const fileId in files) {
         const file = files[fileId];
         for (let i = 0; i < file.pageCount; i++) {
@@ -72,7 +71,9 @@ const App: React.FC = () => {
               grayscale: false,
               whiteness: 0,
               blackness: 0
-            }
+            },
+            drawingDataUrl: null,
+            rotation: 0
           });
         }
       }
@@ -141,6 +142,7 @@ const App: React.FC = () => {
               setLayout={setLayout} 
               onNext={() => setCurrentStep(AppStep.DOWNLOAD)} 
               pages={pages}
+              setPages={setPages}
             />
           )}
 
