@@ -1,3 +1,4 @@
+
 export interface PageFilters {
   invert: boolean;
   grayscale: boolean;
@@ -14,6 +15,8 @@ export interface PageItem {
   height: number;
   isSelected: boolean;
   filters: PageFilters;
+  drawingDataUrl: string | null; // Base64 PNG of the doodle layer (transparent)
+  rotation: 0 | 90 | 180 | 270; // Rotation in degrees
 }
 
 export interface UploadedFile {
@@ -25,7 +28,7 @@ export interface UploadedFile {
 }
 
 export interface LayoutSettings {
-  nUp: 1 | 2 | 4; // 1, 2, or 4 slides per page
+  nUp: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8; 
   showBorders: boolean;
 }
 
