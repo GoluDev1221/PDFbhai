@@ -73,7 +73,7 @@ export const LegalFooter: React.FC = () => {
 
                 {/* Option 2: GitHub */}
                 <a 
-                    href="https://github.com/GoluDev1221/PDFbhai/releases" 
+                    href="https://github.com/GoluDev1221/PDFbhai/releases/download/v1.0.1/PDFbhai.apk" 
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex flex-col items-center justify-center p-6 border-2 border-gray-200 dark:border-zinc-700 rounded-xl hover:border-black dark:hover:border-white hover:bg-gray-50 dark:hover:bg-zinc-800 transition-all text-center group"
