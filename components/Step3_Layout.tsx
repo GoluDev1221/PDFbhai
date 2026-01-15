@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { LayoutSettings, PageItem } from '../types';
-import { ArrowRight, RotateCw, GripVertical, Settings, List, GraduationCap, Coins, StickyNote } from 'lucide-react';
+import { ArrowRight, RotateCw, GripVertical, Settings, List, GraduationCap, Grid, Moon, Layout } from 'lucide-react';
 import { 
   DndContext, 
   closestCenter, 
@@ -84,10 +84,32 @@ export const Step3_Layout: React.FC<Step3Props> = ({ layout, setLayout, onNext, 
     }));
   };
 
-  const applyStudentPreset = (type: 'notes' | 'economy' | 'cheat') => {
-      if (type === 'notes') setLayout({ nUp: 1, showBorders: false });
-      if (type === 'economy') setLayout({ nUp: 2, showBorders: true });
-      if (type === 'cheat') setLayout({ nUp: 4, showBorders: true });
+  const applyStudentPreset = (type: 'standard' | 'smart_grid' | 'ink_saver') => {
+      if (type === 'standard') {
+          setLayout({ nUp: 1, showBorders: false });
+          // We don't reset rotation/filters here to avoid destroying user manual work from Step 2
+      }
+      else if (type === 'smart_grid') {
+          setLayout({ nUp: 4, showBorders: true });
+          setPages(prev => prev.map(p => ({
+              ...p,
+              // Rotate 90 degrees to fit Landscape slides into Portrait grid cells
+              rotation: 90 
+          })));
+      }
+      else if (type === 'ink_saver') {
+          setLayout({ nUp: 4, showBorders: true });
+          setPages(prev => prev.map(p => ({
+              ...p,
+              rotation: 90,
+              filters: {
+                  invert: true,
+                  grayscale: true,
+                  blackness: 50,
+                  whiteness: 10
+              }
+          })));
+      }
   };
 
   const sensors = useSensors(
@@ -149,25 +171,30 @@ export const Step3_Layout: React.FC<Step3Props> = ({ layout, setLayout, onNext, 
                                 <GraduationCap size={14} /> Student Presets
                             </label>
                             <div className="grid grid-cols-1 gap-2">
-                                <button onClick={() => applyStudentPreset('notes')} className={`p-3 rounded-xl border text-left flex items-center gap-3 transition-all ${layout.nUp === 1 ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 ring-1 ring-indigo-600' : 'border-gray-200 dark:border-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-800'}`}>
-                                    <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center"><StickyNote size={16} /></div>
+                                {/* Option 1: Standard */}
+                                <button onClick={() => applyStudentPreset('standard')} className={`p-3 rounded-xl border text-left flex items-center gap-3 transition-all ${layout.nUp === 1 ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 ring-1 ring-indigo-600' : 'border-gray-200 dark:border-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-800'}`}>
+                                    <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center"><Layout size={16} /></div>
                                     <div>
                                         <div className="text-sm font-bold text-gray-900 dark:text-white">Standard Notes</div>
-                                        <div className="text-[10px] text-gray-500">1 Slide per page</div>
+                                        <div className="text-[10px] text-gray-500">1 Slide per page (Reset)</div>
                                     </div>
                                 </button>
-                                <button onClick={() => applyStudentPreset('economy')} className={`p-3 rounded-xl border text-left flex items-center gap-3 transition-all ${layout.nUp === 2 ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 ring-1 ring-indigo-600' : 'border-gray-200 dark:border-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-800'}`}>
-                                    <div className="w-8 h-8 rounded-lg bg-green-100 text-green-600 flex items-center justify-center"><Coins size={16} /></div>
+                                
+                                {/* Option 2: Smart Grid (4-Up + Rotate) */}
+                                <button onClick={() => applyStudentPreset('smart_grid')} className={`p-3 rounded-xl border text-left flex items-center gap-3 transition-all ${layout.nUp === 4 ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 ring-1 ring-indigo-600' : 'border-gray-200 dark:border-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-800'}`}>
+                                    <div className="w-8 h-8 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center"><Grid size={16} /></div>
                                     <div>
-                                        <div className="text-sm font-bold text-gray-900 dark:text-white">Economy Saver</div>
-                                        <div className="text-[10px] text-gray-500">2 Slides • Saves 50% Paper</div>
+                                        <div className="text-sm font-bold text-gray-900 dark:text-white">Smart Grid (4x)</div>
+                                        <div className="text-[10px] text-gray-500">4 Slides • Rotated 90° for fit</div>
                                     </div>
                                 </button>
-                                <button onClick={() => applyStudentPreset('cheat')} className={`p-3 rounded-xl border text-left flex items-center gap-3 transition-all ${layout.nUp === 4 ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 ring-1 ring-indigo-600' : 'border-gray-200 dark:border-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-800'}`}>
-                                    <div className="w-8 h-8 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center"><List size={16} /></div>
+
+                                {/* Option 3: Ink Saver (4-Up + Rotate + Filters) */}
+                                <button onClick={() => applyStudentPreset('ink_saver')} className="p-3 rounded-xl border border-gray-200 dark:border-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-800 text-left flex items-center gap-3 transition-all">
+                                    <div className="w-8 h-8 rounded-lg bg-gray-900 text-white flex items-center justify-center"><Moon size={16} /></div>
                                     <div>
-                                        <div className="text-sm font-bold text-gray-900 dark:text-white">Cheat Sheet</div>
-                                        <div className="text-[10px] text-gray-500">4 Slides • Maximum Dense</div>
+                                        <div className="text-sm font-bold text-gray-900 dark:text-white">Ink Saver Max</div>
+                                        <div className="text-[10px] text-gray-500">4x Grid • Rotated • Dark Mode Invert</div>
                                     </div>
                                 </button>
                             </div>
