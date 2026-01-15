@@ -158,21 +158,12 @@ export const generateFinalPdf = async (
     ctx.rotate((pageItem.rotation * Math.PI) / 180);
     ctx.drawImage(img, -width / 2, -height / 2);
     
-    // Reset Transform for Filters (Filters apply to pixels, so we apply to the whole rotated canvas)
-    // Actually filters should apply to the content.
-    // However, applyFiltersToContext works on ImageData. 
-    // We need to apply filters BEFORE rotation to handle them correctly per pixel relative to content?
-    // No, applyFiltersToContext is a simple pixel manipulator. Applying it after rotation is fine.
     ctx.setTransform(1, 0, 0, 1, 0, 0);
 
     // 4. Apply Filters
     applyFiltersToContext(ctx, canvas.width, canvas.height, pageItem.filters);
 
     // 5. Apply Drawing / Doodle Layer
-    // We need to rotate the context again to match the image orientation if we want the drawing to stick to the image
-    // OR, we assume the drawing was made ON TOP of the visual orientation.
-    // In Step2_Workshop, the user draws on the displayed image. If the image wasn't rotated then, the doodle is upright.
-    // Since rotation happens in Step 3, the doodle should rotate WITH the image.
     if (pageItem.drawingDataUrl) {
         const doodleImg = new Image();
         doodleImg.src = pageItem.drawingDataUrl;
@@ -183,6 +174,34 @@ export const generateFinalPdf = async (
         // Doodle is drawn on original dimensions
         ctx.drawImage(doodleImg, -width / 2, -height / 2, width, height);
         ctx.setTransform(1, 0, 0, 1, 0, 0);
+    }
+
+    // 6. Draw Page Number (If enabled)
+    if (layout.showPageNumbers) {
+      const pageNum = (pageItem.originalPageIndex + 1).toString();
+      const fontSize = Math.max(12, Math.floor(canvas.height * 0.03));
+      
+      ctx.font = `bold ${fontSize}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'bottom';
+      
+      // Calculate position (bottom center)
+      const x = canvas.width / 2;
+      const y = canvas.height - (fontSize / 2);
+      
+      // Draw pill background
+      const textWidth = ctx.measureText(pageNum).width;
+      const padding = fontSize * 0.6;
+      const pillHeight = fontSize * 1.4;
+      
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+      ctx.beginPath();
+      ctx.roundRect(x - (textWidth/2) - (padding/2), y - pillHeight + (fontSize * 0.2), textWidth + padding, pillHeight, pillHeight/2);
+      ctx.fill();
+
+      // Draw Text
+      ctx.fillStyle = '#000000';
+      ctx.fillText(pageNum, x, y);
     }
 
     // Return compressed JPEG bytes
