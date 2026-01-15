@@ -16,7 +16,7 @@ export const Step1_Upload: React.FC<Step1Props> = ({ files, onFilesAdded, onFile
     e.preventDefault();
     e.stopPropagation();
     
-    const droppedFiles = Array.from(e.dataTransfer.files).filter(f => f.type === 'application/pdf');
+    const droppedFiles = (Array.from(e.dataTransfer.files) as File[]).filter(f => f.type === 'application/pdf');
     if (droppedFiles.length > 0) {
       onFilesAdded(droppedFiles);
     }
@@ -28,7 +28,7 @@ export const Step1_Upload: React.FC<Step1Props> = ({ files, onFilesAdded, onFile
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      const selectedFiles = Array.from(e.target.files).filter(f => f.type === 'application/pdf');
+      const selectedFiles = (Array.from(e.target.files) as File[]).filter(f => f.type === 'application/pdf');
       onFilesAdded(selectedFiles);
     }
   };
