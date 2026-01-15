@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { X, ShieldCheck, HelpCircle, FileText, Smartphone, Download, ExternalLink } from 'lucide-react';
+import { X, ShieldCheck, HelpCircle, FileText, Smartphone, Download, Github } from 'lucide-react';
 
 type ModalType = 'terms' | 'privacy' | 'faq' | 'mobile' | null;
 
@@ -71,16 +71,16 @@ export const LegalFooter: React.FC = () => {
                     <span className="text-xs text-gray-500 mt-1">Sideload instantly</span>
                 </a>
 
-                {/* Option 2: Store Link (e.g., GitHub or Amazon) */}
+                {/* Option 2: GitHub */}
                 <a 
-                    href="#" 
+                    href="https://github.com/YOUR_USERNAME/YOUR_REPO/releases" 
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex flex-col items-center justify-center p-6 border-2 border-gray-200 dark:border-zinc-700 rounded-xl hover:border-black dark:hover:border-white hover:bg-gray-50 dark:hover:bg-zinc-800 transition-all text-center group"
                 >
-                    <ExternalLink size={32} className="mb-3 text-gray-400 group-hover:text-black dark:group-hover:text-white" />
-                    <span className="font-bold text-gray-900 dark:text-white">GitHub / Amazon</span>
-                    <span className="text-xs text-gray-500 mt-1">Verified Release</span>
+                    <Github size={32} className="mb-3 text-gray-400 group-hover:text-black dark:group-hover:text-white" />
+                    <span className="font-bold text-gray-900 dark:text-white">GitHub Release</span>
+                    <span className="text-xs text-gray-500 mt-1">Verify source & download</span>
                 </a>
             </div>
 
