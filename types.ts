@@ -1,4 +1,5 @@
 
+
 export interface PageFilters {
   invert: boolean;
   grayscale: boolean;
@@ -34,7 +35,8 @@ export interface LayoutSettings {
 
 export enum AppStep {
   UPLOAD = 1,
-  WORKSHOP = 2,
-  LAYOUT = 3,
-  DOWNLOAD = 4,
+  DASHBOARD = 2,
+  WORKSHOP = 3,
+  LAYOUT = 4,
+  DOWNLOAD = 5,
 }
