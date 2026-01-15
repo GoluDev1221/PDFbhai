@@ -5,6 +5,7 @@ import { Step1_Upload } from './components/Step1_Upload';
 import { Step2_Workshop } from './components/Step2_Workshop';
 import { Step3_Layout } from './components/Step3_Layout';
 import { Step4_Download } from './components/Step4_Download';
+import { LegalFooter } from './components/LegalFooter';
 import { AppStep, UploadedFile, PageItem, LayoutSettings } from './types';
 import { loadPdfFile, renderPageToThumbnail } from './services/pdfService';
 
@@ -98,23 +99,35 @@ const App: React.FC = () => {
   // --- Render ---
 
   return (
-    <div className="min-h-screen bg-[#fafafa] dark:bg-[#0f0f0f] text-gray-900 dark:text-gray-100 font-sans selection:bg-indigo-500 selection:text-white">
+    <div className="min-h-screen bg-[#fafafa] dark:bg-[#0f0f0f] text-gray-900 dark:text-gray-100 font-sans selection:bg-indigo-500 selection:text-white flex flex-col">
       
       {/* Header */}
       <header className="fixed top-0 w-full z-50 bg-[#fafafa]/80 dark:bg-[#0f0f0f]/80 backdrop-blur-md border-b border-gray-200 dark:border-zinc-800">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-lg">
+          <div className="flex items-center gap-3">
+            {/* Logo Implementation */}
+            <img 
+                src="/logo.png" 
+                alt="PDFbhai Logo" 
+                className="w-8 h-8 rounded-lg object-contain bg-indigo-600"
+                onError={(e) => {
+                    // Fallback if logo.png is missing
+                    e.currentTarget.style.display = 'none';
+                    e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                }}
+            />
+            {/* Fallback Logo */}
+            <div className="hidden w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-lg">
               P
             </div>
             <span className="font-bold text-xl tracking-tight">PDFbhai</span>
           </div>
-          <div className="text-xs font-mono text-gray-400">Privacy-First. Local. Fast.</div>
+          <div className="text-xs font-mono text-gray-400 hidden sm:block">Privacy-First. Local. Fast.</div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="pt-32 px-6 pb-20">
+      <main className="pt-24 px-4 sm:px-6 pb-20 flex-1 w-full max-w-[1920px] mx-auto">
         <Stepper currentStep={currentStep} onStepClick={setCurrentStep} />
         
         <div className="min-h-[60vh]">
@@ -157,6 +170,8 @@ const App: React.FC = () => {
         </div>
       </main>
 
+      {/* Legal Footer */}
+      <LegalFooter />
     </div>
   );
 };
