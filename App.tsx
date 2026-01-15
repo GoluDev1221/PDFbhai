@@ -12,7 +12,7 @@ const App: React.FC = () => {
   const [files, setFiles] = useState<Record<string, UploadedFile>>({});
   const [pages, setPages] = useState<PageItem[]>([]);
   // DEFAULT: 4-Up Grid + Borders enabled
-  const [layout, setLayout] = useState<LayoutSettings>({ nUp: 4, showBorders: true });
+  const [layout, setLayout] = useState<LayoutSettings>({ nUp: 4, showBorders: true, showPageNumbers: false });
   const [isProcessingUpload, setIsProcessingUpload] = useState(false);
 
   // --- Handlers ---
@@ -96,7 +96,7 @@ const App: React.FC = () => {
   const resetApp = () => {
     setFiles({});
     setPages([]);
-    setLayout({ nUp: 4, showBorders: true });
+    setLayout({ nUp: 4, showBorders: true, showPageNumbers: false });
     setCurrentStep(AppStep.UPLOAD);
   };
 
