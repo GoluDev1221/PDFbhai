@@ -36,20 +36,20 @@
       "sizes": "512x512",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "Desktop Workshop View"
+      "label": "Desktop Workshop"
     },
     {
       "src": "/logo.png",
       "sizes": "512x512",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "Mobile Layout View"
+      "label": "Mobile Layout"
     }
   ],
   "shortcuts": [
     {
-      "name": "Start Workshop",
-      "short_name": "Workshop",
+      "name": "New Project",
+      "short_name": "New",
       "url": "/",
       "icons": [{ "src": "/logo.png", "sizes": "192x192" }]
     }
