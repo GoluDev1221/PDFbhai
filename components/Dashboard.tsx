@@ -1,8 +1,8 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { PageItem, LayoutSettings, UploadedFile } from '../types';
 import { generateFinalPdf } from '../services/pdfService';
-import { Download, Settings, Sliders, Grid, Loader2, CheckCircle, RefreshCcw, Moon, Sun, ArrowLeft } from 'lucide-react';
+import { Download, Settings, Sliders, Loader2, CheckCircle, RefreshCcw, Moon, Sun } from 'lucide-react';
 
 interface DashboardProps {
   pages: PageItem[];
@@ -116,12 +116,20 @@ export const Dashboard: React.FC<DashboardProps> = ({ pages, setPages, files, la
                     <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
                 </button>
 
-                <button 
-                    onClick={() => setIsCustomizing(true)}
-                    className="text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white text-sm font-medium flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
-                >
-                    <Settings size={14} /> Make Adjustments
-                </button>
+                <div className="flex items-center justify-center gap-4">
+                    <button 
+                        onClick={() => setIsCustomizing(true)}
+                        className="text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white text-sm font-medium flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
+                    >
+                        <Settings size={14} /> Make Adjustments
+                    </button>
+                    <button 
+                        onClick={onReset}
+                        className="text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 text-sm font-medium flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
+                    >
+                        <RefreshCcw size={14} /> Start Over
+                    </button>
+                </div>
             </div>
         ) : (
             <div className="w-full bg-white dark:bg-[#1a1a1a] rounded-2xl shadow-xl border border-gray-200 dark:border-zinc-800 p-6 animate-slide-up text-left">
