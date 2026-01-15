@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { X, ShieldCheck, HelpCircle, FileText, Smartphone, Download, Github } from 'lucide-react';
+import { X, ShieldCheck, HelpCircle, FileText, Smartphone, Github } from 'lucide-react';
 
 type ModalType = 'terms' | 'privacy' | 'faq' | 'mobile' | null;
 
@@ -11,7 +11,7 @@ export const LegalFooter: React.FC = () => {
 
   const Modal: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
     <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in" onClick={closeModal}>
-      <div className="bg-white dark:bg-[#1a1a1a] w-full max-w-2xl max-h-[80vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
+      <div className="bg-white dark:bg-[#1a1a1a] w-full max-w-xl max-h-[80vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
         <div className="p-4 border-b border-gray-200 dark:border-zinc-800 flex justify-between items-center bg-gray-50 dark:bg-zinc-900">
           <h3 className="text-lg font-bold text-gray-900 dark:text-white">{title}</h3>
           <button onClick={closeModal} className="p-2 hover:bg-gray-200 dark:hover:bg-zinc-800 rounded-lg text-gray-500">
@@ -48,44 +48,30 @@ export const LegalFooter: React.FC = () => {
       </div>
 
       {activeModal === 'mobile' && (
-        <Modal title="Get the Android App">
+        <Modal title="Download for Android">
           <div className="space-y-6">
             <div className="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-xl border border-indigo-100 dark:border-indigo-900">
-                <p className="font-semibold text-indigo-900 dark:text-indigo-200 mb-2">Why use the App?</p>
-                <ul className="list-disc pl-5 space-y-1 text-indigo-800 dark:text-indigo-300">
-                    <li>Works 100% Offline (No internet needed)</li>
-                    <li>Faster processing for large files</li>
-                    <li>Better full-screen experience</li>
-                </ul>
+                <p className="font-semibold text-indigo-900 dark:text-indigo-200 mb-2">Open Source & Secure</p>
+                <p className="text-sm text-indigo-800 dark:text-indigo-300 leading-relaxed">
+                    PDFbhai is open-source software. For maximum security and transparency, we host our Android releases directly on GitHub.
+                </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* Option 1: Direct Download */}
+            <div className="flex justify-center">
                 <a 
-                    href="/PDFbhai.apk" 
-                    download
-                    className="flex flex-col items-center justify-center p-6 border-2 border-gray-200 dark:border-zinc-700 rounded-xl hover:border-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/10 transition-all text-center group"
-                >
-                    <Download size={32} className="mb-3 text-gray-400 group-hover:text-indigo-600" />
-                    <span className="font-bold text-gray-900 dark:text-white">Direct APK Download</span>
-                    <span className="text-xs text-gray-500 mt-1">Sideload instantly</span>
-                </a>
-
-                {/* Option 2: GitHub */}
-                <a 
-                    href="https://github.com/GoluDev1221/PDFbhai/releases/download/v1.0.1/PDFbhai.apk" 
+                    href="https://github.com/YOUR_USERNAME/YOUR_REPO/releases" 
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex flex-col items-center justify-center p-6 border-2 border-gray-200 dark:border-zinc-700 rounded-xl hover:border-black dark:hover:border-white hover:bg-gray-50 dark:hover:bg-zinc-800 transition-all text-center group"
+                    className="w-full flex flex-col items-center justify-center p-6 border-2 border-gray-200 dark:border-zinc-700 rounded-xl hover:border-black dark:hover:border-white hover:bg-gray-50 dark:hover:bg-zinc-800 transition-all text-center group"
                 >
-                    <Github size={32} className="mb-3 text-gray-400 group-hover:text-black dark:group-hover:text-white" />
-                    <span className="font-bold text-gray-900 dark:text-white">GitHub Release</span>
-                    <span className="text-xs text-gray-500 mt-1">Verify source & download</span>
+                    <Github size={40} className="mb-4 text-gray-400 group-hover:text-black dark:group-hover:text-white transition-colors" />
+                    <span className="font-bold text-lg text-gray-900 dark:text-white">Download APK from GitHub</span>
+                    <span className="text-sm text-gray-500 mt-2">Verifiable Source Code & Releases</span>
                 </a>
             </div>
 
-            <p className="text-xs text-gray-400 text-center">
-                Note: Since we are an open-source privacy tool, you may need to "Allow installation from unknown sources" if downloading the APK directly.
+            <p className="text-xs text-gray-400 text-center px-4">
+                Note: You may need to enable "Install from Unknown Sources" in your Android settings to install apps downloaded from GitHub.
             </p>
           </div>
         </Modal>
@@ -125,11 +111,11 @@ export const LegalFooter: React.FC = () => {
             </div>
             <div>
               <h4 className="font-bold text-gray-900 dark:text-white mb-1">Are my files safe?</h4>
-              <p>Yes. Unlike other tools, we don't upload your files to a server. Everything stays on your laptop or phone. You can even turn off your internet after loading the page and it will still work!</p>
+              <p>Yes. We don't upload your files to any server. Everything happens locally on your device.</p>
             </div>
             <div>
-              <h4 className="font-bold text-gray-900 dark:text-white mb-1">Why does it look like Notion?</h4>
-              <p>We love clean design. We wanted a tool that feels calm and organized, just like your notes.</p>
+              <h4 className="font-bold text-gray-900 dark:text-white mb-1">Does it work offline?</h4>
+              <p>We use <strong>Negligible Internet</strong>. You only need the internet to load the app for the first time (about 2MB). After that, you can turn off your Wi-Fi or data, and the app will continue to work perfectly for merging, editing, and saving files.</p>
             </div>
           </div>
         </Modal>
