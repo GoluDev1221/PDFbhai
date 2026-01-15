@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { LayoutSettings, PageItem } from '../types';
-import { ArrowRight, RotateCw, GripVertical, Settings, List, GraduationCap, Grid, Moon, Layout, Info } from 'lucide-react';
+import { ArrowRight, RotateCw, GripVertical, Settings, List, Grid } from 'lucide-react';
 import { 
   DndContext, 
   closestCenter, 
@@ -29,7 +29,7 @@ interface Step3Props {
 }
 
 // Sidebar Sortable Item for "Sequence" tab
-const SidebarSortableItem = ({ id, page }: { id: string, page: PageItem }) => {
+const SidebarSortableItem: React.FC<{ id: string, page: PageItem }> = ({ id, page }) => {
   const {
     attributes,
     listeners,
@@ -82,34 +82,6 @@ export const Step3_Layout: React.FC<Step3Props> = ({ layout, setLayout, onNext, 
         }
         return p;
     }));
-  };
-
-  const applyStudentPreset = (type: 'standard' | 'smart_grid' | 'ink_saver') => {
-      if (type === 'standard') {
-          setLayout({ nUp: 1, showBorders: false });
-          // Note: We don't reset rotation/filters here to preserve user's manual edits
-      }
-      else if (type === 'smart_grid') {
-          setLayout({ nUp: 4, showBorders: true });
-          setPages(prev => prev.map(p => ({
-              ...p,
-              // Rotate 90 degrees to fit Landscape slides into Portrait grid cells
-              rotation: 90 
-          })));
-      }
-      else if (type === 'ink_saver') {
-          setLayout({ nUp: 4, showBorders: true });
-          setPages(prev => prev.map(p => ({
-              ...p,
-              rotation: 90,
-              filters: {
-                  invert: true,
-                  grayscale: true,
-                  blackness: 50,
-                  whiteness: 10
-              }
-          })));
-      }
   };
 
   const sensors = useSensors(
@@ -165,56 +137,13 @@ export const Step3_Layout: React.FC<Step3Props> = ({ layout, setLayout, onNext, 
                 {sidebarTab === 'config' ? (
                     <div className="space-y-8">
                         
-                        {/* Student Smart Presets */}
                         <div>
-                            <div className="flex items-center justify-between mb-4">
-                                <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-2">
-                                    <GraduationCap size={14} /> Student Presets
+                            <div className="flex items-center gap-2 mb-4">
+                                <Grid size={14} className="text-gray-500" />
+                                <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    Grid Size (N-Up)
                                 </label>
-                                <div className="group relative">
-                                    <Info size={14} className="text-gray-400 cursor-help" />
-                                    <div className="absolute right-0 w-48 p-2 bg-black text-white text-[10px] rounded hidden group-hover:block z-50">
-                                        One-click optimizations for printing exam notes.
-                                    </div>
-                                </div>
                             </div>
-                            
-                            <div className="grid grid-cols-1 gap-2">
-                                {/* Option 1: Standard */}
-                                <button onClick={() => applyStudentPreset('standard')} className={`p-3 rounded-xl border text-left flex items-center gap-3 transition-all ${layout.nUp === 1 ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 ring-1 ring-indigo-600' : 'border-gray-200 dark:border-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-800'}`}>
-                                    <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0"><Layout size={16} /></div>
-                                    <div>
-                                        <div className="text-sm font-bold text-gray-900 dark:text-white">Standard Notes</div>
-                                        <div className="text-[10px] text-gray-500">1 Slide per page</div>
-                                    </div>
-                                </button>
-                                
-                                {/* Option 2: Smart Grid */}
-                                <button onClick={() => applyStudentPreset('smart_grid')} className={`p-3 rounded-xl border text-left flex items-center gap-3 transition-all ${layout.nUp === 4 ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 ring-1 ring-indigo-600' : 'border-gray-200 dark:border-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-800'}`}>
-                                    <div className="w-8 h-8 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center flex-shrink-0"><Grid size={16} /></div>
-                                    <div>
-                                        <div className="text-sm font-bold text-gray-900 dark:text-white">Smart Grid (4x)</div>
-                                        <div className="text-[10px] text-gray-500">4 slides/page • Auto-rotate 90°</div>
-                                    </div>
-                                </button>
-
-                                {/* Option 3: Ink Saver */}
-                                <button onClick={() => applyStudentPreset('ink_saver')} className="p-3 rounded-xl border border-gray-200 dark:border-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-800 text-left flex items-center gap-3 transition-all group">
-                                    <div className="w-8 h-8 rounded-lg bg-gray-900 text-white flex items-center justify-center flex-shrink-0"><Moon size={16} /></div>
-                                    <div>
-                                        <div className="text-sm font-bold text-gray-900 dark:text-white group-hover:text-indigo-600 transition-colors">Ink Saver Max</div>
-                                        <div className="text-[10px] text-gray-500">4x Grid • Invert Colors • Save $$$</div>
-                                    </div>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div className="h-px bg-gray-200 dark:bg-zinc-800" />
-
-                        <div>
-                            <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-4 uppercase tracking-wider">
-                                Manual Grid (N-Up)
-                            </label>
                             <div className="grid grid-cols-4 gap-2">
                             {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
                                 <button
@@ -231,6 +160,7 @@ export const Step3_Layout: React.FC<Step3Props> = ({ layout, setLayout, onNext, 
                                 </button>
                             ))}
                             </div>
+                            <p className="mt-2 text-[10px] text-gray-400">Default is 4 for economy.</p>
                         </div>
 
                         <div>
