@@ -1,8 +1,8 @@
 
 import React, { useState } from 'react';
-import { X, ShieldCheck, HelpCircle, FileText } from 'lucide-react';
+import { X, ShieldCheck, HelpCircle, FileText, Smartphone, Download, ExternalLink } from 'lucide-react';
 
-type ModalType = 'terms' | 'privacy' | 'faq' | null;
+type ModalType = 'terms' | 'privacy' | 'faq' | 'mobile' | null;
 
 export const LegalFooter: React.FC = () => {
   const [activeModal, setActiveModal] = useState<ModalType>(null);
@@ -31,7 +31,10 @@ export const LegalFooter: React.FC = () => {
         <div className="text-xs text-gray-500">
           © {new Date().getFullYear()} PDFbhai. Free & Local.
         </div>
-        <div className="flex gap-6 text-xs font-medium text-gray-600 dark:text-gray-400">
+        <div className="flex flex-wrap justify-center gap-6 text-xs font-medium text-gray-600 dark:text-gray-400">
+           <button onClick={() => setActiveModal('mobile')} className="text-indigo-600 hover:text-indigo-500 font-bold flex items-center gap-1 transition-colors">
+            <Smartphone size={14} /> Android App
+          </button>
           <button onClick={() => setActiveModal('privacy')} className="hover:text-indigo-600 flex items-center gap-1 transition-colors">
             <ShieldCheck size={14} /> Privacy Policy
           </button>
@@ -43,6 +46,50 @@ export const LegalFooter: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {activeModal === 'mobile' && (
+        <Modal title="Get the Android App">
+          <div className="space-y-6">
+            <div className="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-xl border border-indigo-100 dark:border-indigo-900">
+                <p className="font-semibold text-indigo-900 dark:text-indigo-200 mb-2">Why use the App?</p>
+                <ul className="list-disc pl-5 space-y-1 text-indigo-800 dark:text-indigo-300">
+                    <li>Works 100% Offline (No internet needed)</li>
+                    <li>Faster processing for large files</li>
+                    <li>Better full-screen experience</li>
+                </ul>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Option 1: Direct Download */}
+                <a 
+                    href="/PDFbhai.apk" 
+                    download
+                    className="flex flex-col items-center justify-center p-6 border-2 border-gray-200 dark:border-zinc-700 rounded-xl hover:border-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/10 transition-all text-center group"
+                >
+                    <Download size={32} className="mb-3 text-gray-400 group-hover:text-indigo-600" />
+                    <span className="font-bold text-gray-900 dark:text-white">Direct APK Download</span>
+                    <span className="text-xs text-gray-500 mt-1">Sideload instantly</span>
+                </a>
+
+                {/* Option 2: Store Link (e.g., GitHub or Amazon) */}
+                <a 
+                    href="#" 
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex flex-col items-center justify-center p-6 border-2 border-gray-200 dark:border-zinc-700 rounded-xl hover:border-black dark:hover:border-white hover:bg-gray-50 dark:hover:bg-zinc-800 transition-all text-center group"
+                >
+                    <ExternalLink size={32} className="mb-3 text-gray-400 group-hover:text-black dark:group-hover:text-white" />
+                    <span className="font-bold text-gray-900 dark:text-white">GitHub / Amazon</span>
+                    <span className="text-xs text-gray-500 mt-1">Verified Release</span>
+                </a>
+            </div>
+
+            <p className="text-xs text-gray-400 text-center">
+                Note: Since we are an open-source privacy tool, you may need to "Allow installation from unknown sources" if downloading the APK directly.
+            </p>
+          </div>
+        </Modal>
+      )}
 
       {activeModal === 'privacy' && (
         <Modal title="Privacy Policy">
